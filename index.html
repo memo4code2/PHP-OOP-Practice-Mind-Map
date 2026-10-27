@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PHP OOP — Practice Sheet 01</title>
+<style>
+body{font-family:Tahoma,Arial,sans-serif;max-width:800px;margin:0 auto;padding:16px;line-height:1.8;background:#fafafa;color:#222}
+h1,h2{text-align:center}
+.q,.s{background:#fff;border:1px solid #ddd;border-radius:8px;padding:12px 16px;margin:12px 0}
+.lv{font-size:.8em;background:#e8f0fe;border-radius:10px;padding:2px 10px;margin-right:8px}
+.c{color:#666;font-size:.9em}
+pre{direction:ltr;text-align:left;background:#1e1e1e;color:#e6e6e6;padding:12px;border-radius:6px;overflow-x:auto;white-space:pre-wrap}
+a{color:#1a56db}
+h3{margin:.3em 0}
+</style>
+</head>
+<body>
+<h1>PHP OOP — Practice Sheet 01</h1>
+<p style="text-align:center">Level: Easy → Hard | 50 تمرين: الأسئلة الأصلية (1–12) + أسئلة إضافية (13–50)</p>
+<div id="qs"></div>
+<h2>الحلول</h2>
+<p style="text-align:center" class="c">كل الحلول تبدأ بـ &lt;?php — جرّبها في ملف .php أو على 3v4l.org</p>
+<div id="ss"></div>
+<script>
+const L=[[1,"الأول: الأساسيات"],[4,"الثاني: التحكم في البيانات"],[6,"الثالث: العلاقات بين الـ Classes"],[9,"الرابع: المتوسط والصعب"],[13,"سهل جدًا"],[19,"سهل — متوسط"],[25,"متوسط"],[32,"متوسط — صعب"],[43,"صعب / تحدي"]];
+const E=[
+["User Class","أنشئ Class باسم User فيه name وemail وMethod getInfo() ترجع البيانات String. أنشئ مستخدم Mohamed وإيميله mohamed@example.com واطبع getInfo().","Class, Object, Properties, Methods, $this",
+`class User{public string $name;public string $email;
+function getInfo(){return "$this->name - $this->email";}}
+$u=new User;$u->name="Mohamed";$u->email="mohamed@example.com";
+echo $u->getInfo();`],
+["Product Class","أنشئ Class باسم Product فيه name وprice وMethods: getPrice() وgetInfo(). أنشئ 3 منتجات واطبع بياناتهم.","Objects, Methods, Return Values",
+`class Product{public string $name;public float $price;
+function getPrice(){return $this->price;}
+function getInfo(){return "$this->name: $this->price EGP";}}
+foreach([["Pen",5],["Book",50],["Bag",300]] as [$n,$p]){
+$x=new Product;$x->name=$n;$x->price=$p;echo $x->getInfo().PHP_EOL;}`],
+["Constructor","طوّر User بحيث الـ Constructor يستقبل الاسم والإيميل ويخزنهم. أنشئ أكتر من User من غير ما تعدل الـ Class.","__construct(), $this",
+`class User{function __construct(public string $name,public string $email){}
+function getInfo(){return "$this->name - $this->email";}}
+echo (new User("Mohamed","mohamed@example.com"))->getInfo().PHP_EOL;
+echo (new User("Sara","sara@example.com"))->getInfo();`],
+["Bank Account","Class BankAccount فيه accountNumber وbalance وConstructor وdeposit() وwithdraw() وgetBalance(). ممنوع الإيداع صفر/سالب، وممنوع السحب أكتر من الرصيد، وممنوع الوصول المباشر للرصيد.","Encapsulation, private, Validation",
+`class BankAccount{
+function __construct(private string $accountNumber,private float $balance){}
+function deposit(float $a){if($a<=0)throw new InvalidArgumentException("Invalid amount");$this->balance+=$a;}
+function withdraw(float $a){if($a<=0||$a>$this->balance)throw new InvalidArgumentException("Invalid amount");$this->balance-=$a;}
+function getBalance(){return $this->balance;}}
+$acc=new BankAccount("123",1000);$acc->deposit(500);$acc->withdraw(200);echo $acc->getBalance(); // 1300`],
+["Student Grades","Class Student فيه name وgrades وaddGrade() وgetAverage() وgetStatus() (Pass لو 50 أو أكتر وإلا Fail). الدرجة من 0 لـ 100، ولو مفيش درجات ما تقسمش على صفر.","Arrays, Encapsulation, Conditions",
+`class Student{private array $grades=[];
+function __construct(private string $name){}
+function addGrade(float $g){if($g<0||$g>100)throw new InvalidArgumentException("Grade must be 0-100");$this->grades[]=$g;}
+function getAverage(){return $this->grades?array_sum($this->grades)/count($this->grades):0;}
+function getStatus(){return $this->getAverage()>=50?"Pass":"Fail";}}`],
+["Employee Inheritance","Class Person (الاسم والعمر وMethod للعرض)، وClass Employee يرث منه ويضيف salary وposition وgetEmployeeInfo(). استخدم parent::__construct().","Inheritance, extends, parent, Constructor",
+`class Person{function __construct(protected string $name,protected int $age){}
+function show(){return "$this->name ($this->age)";}}
+class Employee extends Person{
+function __construct(string $n,int $a,private float $salary,private string $position){parent::__construct($n,$a);}
+function getEmployeeInfo(){return $this->show()." - $this->position - $this->salary";}}
+echo (new Employee("Ali",30,8000,"Developer"))->getEmployeeInfo();`],
+["Payment Methods","Interface PaymentMethod فيه pay($amount). ثلاث Classes: CashPayment وCardPayment وWalletPayment. حطهم في Array ومرّ عليهم بـ Loop واستدعِ pay().","Interface, Polymorphism",
+`interface PaymentMethod{function pay(float $amount);}
+class CashPayment implements PaymentMethod{function pay(float $a){echo "Cash: $a".PHP_EOL;}}
+class CardPayment implements PaymentMethod{function pay(float $a){echo "Card: $a".PHP_EOL;}}
+class WalletPayment implements PaymentMethod{function pay(float $a){echo "Wallet: $a".PHP_EOL;}}
+foreach([new CashPayment,new CardPayment,new WalletPayment] as $m)$m->pay(100);`],
+["Notification System","Abstract Class Notification فيه abstract send($message). EmailNotification وSmsNotification يرثوا منه وينفذوا send(). جرّب نفس الرسالة بالنوعين.","Abstract Class, Abstract Methods, Overriding",
+`abstract class Notification{abstract function send(string $message);}
+class EmailNotification extends Notification{function send(string $m){echo "Email: $m".PHP_EOL;}}
+class SmsNotification extends Notification{function send(string $m){echo "SMS: $m".PHP_EOL;}}
+foreach([new EmailNotification,new SmsNotification] as $n)$n->send("Hello");`],
+["Shopping Cart","Class ShoppingCart فيه items private وaddItem($product,$quantity) وremoveItem($productName) وgetTotal() وgetItems(). Class Product منفصل (name, price). الكمية أكبر من صفر والسعر مش سالب.","Composition, Encapsulation, Arrays of Objects",
+`class Product{function __construct(public string $name,public float $price){
+if($price<0)throw new InvalidArgumentException("Negative price");}}
+class ShoppingCart{private array $items=[];
+function addItem(Product $p,int $q){if($q<=0)throw new InvalidArgumentException("Quantity must be > 0");
+$this->items[$p->name]=["product"=>$p,"qty"=>$q];}
+function removeItem(string $name){unset($this->items[$name]);}
+function getTotal(){$t=0;foreach($this->items as $i)$t+=$i["product"]->price*$i["qty"];return $t;}
+function getItems(){return $this->items;}}`],
+["Logger","Class Logger فيه Static Property logCount وStatic Methods: log($message) تطبع وتزيد العداد، وgetLogCount(). سجّل 3 رسائل واطبع العدد.","static, Static Properties, Static Methods",
+`class Logger{private static int $logCount=0;
+static function log(string $m){echo $m.PHP_EOL;self::$logCount++;}
+static function getLogCount(){return self::$logCount;}}
+Logger::log("A");Logger::log("B");Logger::log("C");
+echo Logger::getLogCount(); // 3`],
+["File Manager","Class FileManager فيه Methods لقراءة ملف وكتابة نص وإضافة نص في الآخر والتحقق من وجود الملف. تعامل مع الأخطاء لو الملف مش موجود أو الكتابة فشلت.","File Handling, Exceptions, Encapsulation",
+`class FileManager{
+function exists(string $p):bool{return file_exists($p);}
+function read(string $p):string{if(!$this->exists($p))throw new RuntimeException("File not found");return file_get_contents($p);}
+function write(string $p,string $t){if(file_put_contents($p,$t)===false)throw new RuntimeException("Write failed");}
+function append(string $p,string $t){if(file_put_contents($p,$t,FILE_APPEND)===false)throw new RuntimeException("Append failed");}}`],
+["User Registration System","تحدي: User (الاسم والإيميل والباسورد)، وUserValidator للتحقق، وUserRepository لحفظ المستخدمين في Array. امنع الإيميل المكرر، واستخدم private وExceptions، وكل Class له مسؤولية واحدة.","Encapsulation, Composition, Separation of Responsibilities, Exceptions",
+`class User{function __construct(private string $name,private string $email,private string $password){}
+function getName(){return $this->name;}function getEmail(){return $this->email;}}
+class UserValidator{function validate(string $n,string $e,string $p){
+if(strlen($n)<3)throw new InvalidArgumentException("Name too short");
+if(!filter_var($e,FILTER_VALIDATE_EMAIL))throw new InvalidArgumentException("Invalid email");
+if(strlen($p)<8)throw new InvalidArgumentException("Password too short");}}
+class UserRepository{private array $users=[];
+function save(User $u){if(isset($this->users[$u->getEmail()]))throw new RuntimeException("Email already exists");
+$this->users[$u->getEmail()]=$u;}}
+class RegistrationService{function __construct(private UserValidator $v,private UserRepository $r){}
+function register(string $n,string $e,string $p){$this->v->validate($n,$e,$p);
+$this->r->save(new User($n,$e,password_hash($p,PASSWORD_DEFAULT)));}}
+(new RegistrationService(new UserValidator,new UserRepository))->register("Mohamed","m@example.com","secret123");`],
+["Car","أنشئ Class باسم Car فيه brand وspeed (private)، وMethods: accelerate($n) وgetSpeed().","Class, private, Methods",
+`class Car{private int $speed=0;
+function __construct(public string $brand){}
+function accelerate(int $n){$this->speed+=$n;}
+function getSpeed(){return $this->speed;}}
+$c=new Car("BMW");$c->accelerate(50);echo $c->getSpeed();`],
+["Rectangle","Class باسم Rectangle فيه width وheight، وMethods: getArea() وgetPerimeter().","Constructor Promotion, Return Values",
+`class Rectangle{function __construct(private float $w,private float $h){}
+function getArea(){return $this->w*$this->h;}
+function getPerimeter(){return 2*($this->w+$this->h);}}
+echo (new Rectangle(4,5))->getArea();`],
+["Counter","Class باسم Counter فيه increment() وdecrement() وreset() وgetValue(). العداد ما ينزلش عن صفر.","State, Conditions",
+`class Counter{private int $v=0;
+function increment(){$this->v++;}
+function decrement(){if($this->v>0)$this->v--;}
+function reset(){$this->v=0;}
+function getValue(){return $this->v;}}`],
+["Circle Constant","Class باسم Circle فيه ثابت PI وMethod getArea(). اطبع قيمة PI من بره الـ Class.","const, self::, ::",
+`class Circle{const PI=3.14159;
+function __construct(private float $r){}
+function getArea(){return self::PI*$this->r**2;}}
+echo Circle::PI;`],
+["Book","Class باسم Book فيه title وحالة available. Method borrow() ترجع false لو الكتاب مستعار، وgiveBack() ترجعه.","Boolean State, Methods",
+`class Book{private bool $available=true;
+function __construct(public string $title){}
+function borrow(){if(!$this->available)return false;$this->available=false;return true;}
+function giveBack(){$this->available=true;}}`],
+["Calculator","Class باسم Calculator فيه add وsubtract وmultiply وdivide. القسمة على صفر ترمي Exception.","Methods, Exceptions",
+`class Calculator{
+function add($a,$b){return $a+$b;}
+function subtract($a,$b){return $a-$b;}
+function multiply($a,$b){return $a*$b;}
+function divide($a,$b){if($b==0)throw new InvalidArgumentException("Division by zero");return $a/$b;}}`],
+["Person Setter","Class باسم Person فيه age private مع setAge() وgetAge(). العمر لازم من 0 إلى 120 وإلا ارمي Exception.","Getters, Setters, Validation",
+`class Person{private int $age;
+function setAge(int $a){if($a<0||$a>120)throw new InvalidArgumentException("Invalid age");$this->age=$a;}
+function getAge(){return $this->age;}}`],
+["Immutable Point","Class باسم Point فيه x وy بـ readonly (PHP 8.1). اعمل Method اسمها withX($x) ترجع Object جديد.","readonly, Immutability",
+`class Point{function __construct(public readonly int $x,public readonly int $y){}
+function withX(int $x):Point{return new Point($x,$this->y);}}
+$p=new Point(1,2);$q=$p->withX(5);echo $p->x.$q->x; // 15`],
+["Temperature Converter","Class باسم Temp فيه Static Methods: cToF وfToC. استخدمهم من غير ما تنشئ Object.","static, Static Methods",
+`class Temp{
+static function cToF($c){return $c*9/5+32;}
+static function fToC($f){return ($f-32)*5/9;}}
+echo Temp::cToF(100);`],
+["Stack","Class باسم Stack فيه push وpop وpeek وisEmpty. الـ pop على Stack فاضي يرمي Exception.","Arrays, LIFO, Exceptions",
+`class Stack{private array $items=[];
+function push($i){$this->items[]=$i;}
+function pop(){if($this->isEmpty())throw new UnderflowException("Empty");return array_pop($this->items);}
+function peek(){return end($this->items);}
+function isEmpty(){return !$this->items;}}`],
+["Queue","Class باسم Queue فيه enqueue وdequeue وsize.","Arrays, FIFO",
+`class Queue{private array $q=[];
+function enqueue($i){$this->q[]=$i;}
+function dequeue(){return array_shift($this->q);}
+function size(){return count($this->q);}}`],
+["__toString","طوّر Class Product (name, price) بحيث لما تعمل echo للـ Object يطبع \"Pen: 5 EGP\".","Magic Methods, __toString()",
+`class Product{function __construct(private string $n,private float $p){}
+function __toString():string{return "$this->n: $this->p EGP";}}
+echo new Product("Pen",5);`],
+["Shapes","أنشئ Abstract Class باسم Shape فيه abstract getArea(). ورّث منه Circle وSquare، ومرّ على Array منهم بـ Loop.","Abstract, Polymorphism",
+`abstract class Shape{abstract function getArea():float;}
+class Circle extends Shape{function __construct(private float $r){}
+function getArea():float{return M_PI*$this->r**2;}}
+class Square extends Shape{function __construct(private float $s){}
+function getArea():float{return $this->s**2;}}
+foreach([new Circle(2),new Square(3)] as $s)echo $s->getArea().PHP_EOL;`],
+["Animal Override","Class Animal فيه speak(). ورّث منه Dog وCat وغيّر speak(). في Cat استخدم parent::speak().","Overriding, parent::",
+`class Animal{function speak(){return "...";}}
+class Dog extends Animal{function speak(){return "Woof";}}
+class Cat extends Animal{function speak(){return parent::speak()." Meow";}}
+echo (new Cat)->speak();`],
+["Protected Access","Class Vehicle فيه wheels بـ protected. ورّث منه Bike وغيّر العدد لـ 2. جرّب توصل للـ Property من بره.","protected, Visibility",
+`class Vehicle{protected int $wheels=4;}
+class Bike extends Vehicle{
+function __construct(){$this->wheels=2;}
+function getWheels(){return $this->wheels;}}
+echo (new Bike)->getWheels();
+// (new Bike)->wheels; => Fatal Error`],
+["Timestamps Trait","أنشئ Trait باسم Timestamps فيه createdAt وMethod touch(). استخدمه في Class Post.","Traits, use",
+`trait Timestamps{public ?string $createdAt=null;
+function touch(){$this->createdAt=date("Y-m-d H:i:s");}}
+class Post{use Timestamps;}
+$p=new Post;$p->touch();echo $p->createdAt;`],
+["Multiple Interfaces","Class Invoice ينفذ Interface Printable وكمان JsonSerializable. اطبع الفاتورة كنص وكـ JSON.","implements, JsonSerializable",
+`interface Printable{function print():string;}
+class Invoice implements Printable,JsonSerializable{
+function __construct(private float $t){}
+function print():string{return "Total: $this->t";}
+function jsonSerialize():mixed{return ["total"=>$this->t];}}
+echo json_encode(new Invoice(100));`],
+["instanceof","Class User وClass Admin يرث منه. اكتب دالة canDelete(User $u) ترجع true للـ Admin بس.","instanceof, Type Hinting",
+`class User{}
+class Admin extends User{}
+function canDelete(User $u){return $u instanceof Admin;}
+var_dump(canDelete(new Admin),canDelete(new User));`],
+["Employee Salary","Abstract Class Employee فيه calculateSalary(). FullTime مرتب ثابت، وPartTime ساعات × سعر الساعة.","Abstract, Inheritance, Polymorphism",
+`abstract class Employee{function __construct(protected string $name){}
+abstract function calculateSalary():float;}
+class FullTime extends Employee{
+function __construct(string $n,private float $s){parent::__construct($n);}
+function calculateSalary():float{return $this->s;}}
+class PartTime extends Employee{
+function __construct(string $n,private int $h,private float $r){parent::__construct($n);}
+function calculateSalary():float{return $this->h*$this->r;}}`],
+["Config Magic","Class Config يخزن الإعدادات في Array private ويسمح بـ $c->lang='ar' و echo $c->lang باستخدام __get و__set.","__get, __set, __isset",
+`class Config{private array $d=[];
+function __set($k,$v){$this->d[$k]=$v;}
+function __get($k){return $this->d[$k]??null;}
+function __isset($k){return isset($this->d[$k]);}}
+$c=new Config;$c->lang="ar";echo $c->lang;`],
+["Singleton","اعمل Class DB بـ Singleton: Constructor private وMethod getInstance() ترجع نفس الـ Object دايمًا.","Singleton, static, private __construct",
+`class DB{private static ?DB $i=null;
+private function __construct(){}
+static function getInstance():DB{return self::$i??=new DB;}}
+var_dump(DB::getInstance()===DB::getInstance()); // true`],
+["Dependency Injection","Interface Mailer وClass SmtpMailer. Class UserService يستقبل Mailer في الـ Constructor ويبعت رسالة ترحيب.","Dependency Injection, Interfaces",
+`interface Mailer{function send(string $to,string $msg);}
+class SmtpMailer implements Mailer{
+function send(string $to,string $msg){echo "SMTP to $to: $msg";}}
+class UserService{function __construct(private Mailer $m){}
+function register(string $e){$this->m->send($e,"Welcome!");}}
+(new UserService(new SmtpMailer))->register("a@a.com");`],
+["Custom Exceptions","اعمل InsufficientFundsException ترث من Exception وتحمل المبلغ الناقص. استخدمها في دالة سحب مع try/catch.","Custom Exceptions, try/catch",
+`class InsufficientFundsException extends Exception{
+function __construct(public float $need){parent::__construct("Need $need more");}}
+function withdraw(float $bal,float $a){
+if($a>$bal)throw new InsufficientFundsException($a-$bal);return $bal-$a;}
+try{withdraw(100,150);}catch(InsufficientFundsException $e){echo $e->getMessage();}`],
+["Collection Iterator","Class Collection ينفذ IteratorAggregate عشان تقدر تعمل foreach على الـ Object نفسه.","IteratorAggregate, ArrayIterator",
+`class Collection implements IteratorAggregate{
+function __construct(private array $items=[]){}
+function getIterator():Iterator{return new ArrayIterator($this->items);}}
+foreach(new Collection([1,2,3]) as $i)echo $i;`],
+["Notifier Factory","Interface Notifier مع EmailNotifier وSmsNotifier. Class NotifierFactory فيه create($type) باستخدام match، وترمي Exception لنوع غير معروف.","Factory Pattern, match",
+`interface Notifier{function send(string $m);}
+class EmailNotifier implements Notifier{function send(string $m){echo "Email: $m";}}
+class SmsNotifier implements Notifier{function send(string $m){echo "SMS: $m";}}
+class NotifierFactory{static function create(string $t):Notifier{
+return match($t){"email"=>new EmailNotifier,"sms"=>new SmsNotifier,
+default=>throw new InvalidArgumentException("Unknown $t")};}}
+NotifierFactory::create("sms")->send("Hi");`],
+["Observer Pattern","Class Newsletter يسجل Subscribers ويبلغهم كلهم لما ينشر مقال جديد.","Observer Pattern, Interfaces",
+`interface Observer{function update(string $e);}
+class Newsletter{private array $o=[];
+function attach(Observer $x){$this->o[]=$x;}
+function publish(string $t){foreach($this->o as $x)$x->update($t);}}
+class Subscriber implements Observer{function __construct(private string $n){}
+function update(string $e){echo "$this->n got: $e".PHP_EOL;}}
+$n=new Newsletter;$n->attach(new Subscriber("Ali"));$n->attach(new Subscriber("Sara"));$n->publish("PHP 9!");`],
+["Discount Strategy","Interface Discount مع Percent وFixed. Class Checkout يستقبل أي Discount ويحسب الإجمالي من غير if/else.","Strategy Pattern, Polymorphism",
+`interface Discount{function apply(float $p):float;}
+class Percent implements Discount{function __construct(private float $r){}
+function apply(float $p):float{return $p*(1-$this->r);}}
+class Fixed implements Discount{function __construct(private float $v){}
+function apply(float $p):float{return max(0,$p-$this->v);}}
+class Checkout{function __construct(private Discount $d){}
+function total(float $p){return $this->d->apply($p);}}
+echo (new Checkout(new Percent(0.1)))->total(200); // 180`],
+["Order Status Enum","اعمل Enum باسم OrderStatus (Pending, Paid, Shipped) بقيم نصية وMethod label(). حوّل نص لـ Enum بـ from().","Enum, Backed Enum, from()",
+`enum OrderStatus:string{
+case Pending="pending";case Paid="paid";case Shipped="shipped";
+function label():string{return ucfirst($this->value);}}
+echo OrderStatus::from("paid")->label();`],
+["Bag (ArrayAccess)","Class Bag ينفذ ArrayAccess وCountable عشان تستخدمه زي Array: $b['a']=1 وcount($b).","ArrayAccess, Countable",
+`class Bag implements ArrayAccess,Countable{private array $d=[];
+function offsetExists(mixed $k):bool{return isset($this->d[$k]);}
+function offsetGet(mixed $k):mixed{return $this->d[$k]??null;}
+function offsetSet(mixed $k,mixed $v):void{if($k===null)$this->d[]=$v;else $this->d[$k]=$v;}
+function offsetUnset(mixed $k):void{unset($this->d[$k]);}
+function count():int{return count($this->d);}}
+$b=new Bag;$b["a"]=1;$b[]=2;echo count($b); // 2`],
+["Library System","Class Library يحتوي على Book Objects مع add() وfindByAuthor() وfindByTitle(). استخدم array_filter.","Composition, array_filter, Closures",
+`class Book{function __construct(public string $title,public string $author){}}
+class Library{private array $books=[];
+function add(Book $b){$this->books[]=$b;}
+function findByAuthor(string $a){return array_filter($this->books,fn($b)=>$b->author===$a);}
+function findByTitle(string $t){return array_filter($this->books,fn($b)=>stripos($b->title,$t)!==false);}}`],
+["Repository Interface","Interface Repo فيه save وfind. نفّذه في MemoryRepo بـ Array، وبعدين اشرح إزاي ممكن تبدله بـ FileRepo من غير ما تغير باقي الكود.","Interface, Repository Pattern",
+`interface Repo{function save(array $r):void;function find(int $id):?array;}
+class MemoryRepo implements Repo{private array $d=[];
+function save(array $r):void{$this->d[$r["id"]]=$r;}
+function find(int $id):?array{return $this->d[$id]??null;}}
+$r=new MemoryRepo;$r->save(["id"=>1,"name"=>"Ali"]);print_r($r->find(1));`],
+["Query Builder","Class QueryBuilder بـ Method Chaining: table() وwhere() وlimit() وtoSql().","Method Chaining, return $this",
+`class QB{private string $t="";private array $w=[];private ?int $l=null;
+function table(string $t){$this->t=$t;return $this;}
+function where(string $c){$this->w[]=$c;return $this;}
+function limit(int $n){$this->l=$n;return $this;}
+function toSql(){$s="SELECT * FROM $this->t";
+if($this->w)$s.=" WHERE ".implode(" AND ",$this->w);
+if($this->l)$s.=" LIMIT $this->l";return $s;}}
+echo (new QB)->table("users")->where("age>18")->limit(5)->toSql();`],
+["Event Dispatcher","Class Dispatcher فيه on($event, callable) وdispatch($event, ...$args) يشغل كل الـ Listeners المسجلة.","Callables, Closures, Variadics",
+`class Dispatcher{private array $l=[];
+function on(string $e,callable $f){$this->l[$e][]=$f;}
+function dispatch(string $e,...$args){foreach($this->l[$e]??[] as $f)$f(...$args);}}
+$d=new Dispatcher;
+$d->on("user.created",fn($n)=>print("Welcome $n"));
+$d->dispatch("user.created","Ali");`],
+["Simple Container","اعمل Container بسيط فيه bind($id, Closure) وget($id) يبني الـ Object. اربط UserService بـ SmtpMailer من التمرين 34.","DI Container, Closures",
+`class Container{private array $b=[];
+function bind(string $id,callable $f){$this->b[$id]=$f;}
+function get(string $id){
+return isset($this->b[$id])?($this->b[$id])($this):throw new Exception("Not bound: $id");}}
+$c=new Container;
+$c->bind("mailer",fn()=>new SmtpMailer);
+$c->bind("users",fn($c)=>new UserService($c->get("mailer")));
+$c->get("users")->register("a@a.com");`],
+["Middleware Pipeline","Class Pipeline فيه pipe($fn) وrun($input, $core). كل Middleware يستقبل ($x, $next).","Closures, array_reduce, Pipeline",
+`class Pipeline{private array $m=[];
+function pipe(callable $m){$this->m[]=$m;return $this;}
+function run($in,callable $core){
+$next=array_reduce(array_reverse($this->m),fn($n,$m)=>fn($x)=>$m($x,$n),$core);
+return $next($in);}}
+echo (new Pipeline)
+->pipe(fn($x,$n)=>$n(trim($x)))
+->pipe(fn($x,$n)=>$n(strtoupper($x)))
+->run("  hi ",fn($x)=>$x); // HI`],
+["Money Value Object","Class Money final وImmutable (amount, currency). add() ترجع Object جديد وترمي Exception لو العملات مختلفة. وequals().","Value Object, final, readonly",
+`final class Money{
+function __construct(public readonly int $amount,public readonly string $cur){}
+function add(Money $o):Money{
+if($o->cur!==$this->cur)throw new InvalidArgumentException("Currency mismatch");
+return new Money($this->amount+$o->amount,$this->cur);}
+function equals(Money $o):bool{return $this->amount===$o->amount&&$this->cur===$o->cur;}}
+echo (new Money(100,"EGP"))->add(new Money(50,"EGP"))->amount;`],
+["Mini Model (__call)","Class Model بيدعم getName() وsetName('Sara') وChaining من غير ما تكتب كل Method، باستخدام __call.","__call, Magic Methods, Chaining",
+`abstract class Model{protected array $attrs=[];
+function __call($m,$a){$k=lcfirst(substr($m,3));
+if(str_starts_with($m,"get"))return $this->attrs[$k]??null;
+if(str_starts_with($m,"set")){$this->attrs[$k]=$a[0];return $this;}
+throw new BadMethodCallException($m);}}
+class Customer extends Model{}
+$c=(new Customer)->setName('Sara')->setCity("Giza");
+echo $c->getName();`],
+["Inventory System","نظام مخزن: Item (sku, price, qty)، وInventory فيه add وremove وtotalValue، وOutOfStockException لو الكمية مش كفاية أو الصنف مش موجود.","Composition, Exceptions, Encapsulation, array_map",
+`class OutOfStockException extends Exception{}
+class Item{function __construct(public string $sku,public float $price,public int $qty){}}
+class Inventory{private array $items=[];
+function add(Item $i){$this->items[$i->sku]=$i;}
+function remove(string $sku,int $n){
+$i=$this->items[$sku]??throw new OutOfStockException("No $sku");
+if($i->qty<$n)throw new OutOfStockException("Only $i->qty left");
+$i->qty-=$n;}
+function totalValue(){return array_sum(array_map(fn($i)=>$i->price*$i->qty,$this->items));}}
+$inv=new Inventory;$inv->add(new Item("A1",10,5));$inv->remove("A1",2);echo $inv->totalValue(); // 30`]
+];
+const qs=document.getElementById("qs"),ss=document.getElementById("ss");
+let lastLv="";
+E.forEach((e,i)=>{
+const n=i+1;
+let lv=L[0][1];for(const [s,t] of L)if(n>=s)lv=t;
+if(lv!==lastLv){const h=document.createElement("h2");h.textContent="المستوى: "+lv;qs.appendChild(h);lastLv=lv;}
+const q=document.createElement("div");q.className="q";q.id="q"+n;
+q.innerHTML=`<h3>Exercise ${n} — ${e[0]}<span class="lv">${lv}</span></h3><p></p><p class="c"></p><a href="#s${n}">عرض الحل ↓</a>`;
+q.children[1].textContent=e[1];q.children[2].textContent="المفاهيم: "+e[2];
+qs.appendChild(q);
+const s=document.createElement("div");s.className="s";s.id="s"+n;
+s.innerHTML=`<h3>حل Exercise ${n} — ${e[0]}</h3><pre></pre><a href="#q${n}">↑ رجوع للسؤال</a>`;
+s.querySelector("pre").textContent="<?php\n"+e[3];
+ss.appendChild(s);
+});
+</script>
+</body>
+</html>
